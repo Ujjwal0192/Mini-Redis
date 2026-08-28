@@ -216,38 +216,111 @@ src/test/java/com/miniredis/
 Notably, `RespDecoderTest` includes a test that feeds a complete command **one byte at a time**, simulating worst-case TCP fragmentation — this is the test most from-scratch Redis clones skip, and it's the one most likely to catch a real off-by-one in frame boundary handling.
 
 ---
-## Testing 1,000 and 10,000 concurrent users simultaneously
-PS C:\Users\ujjwa\Desktop\mini-redis> python load_test.py --connections 1000 --host 172.20.112.1 --port 6379
-Launching 1000 concurrent connections to 172.20.112.1:6379...
+## Testing 1,000 and 10,000 Concurrent Connections
 
-==================================================
+The Mini-Redis server was load-tested with **1,000**, **1,024**, and **10,000 simultaneous client connections**.
+
+> **Note:** These tests measure connection handling capability and connection throughput. They do not represent sustained Redis command throughput.
+
+### Test Environment
+
+* **Client:** Python load test script
+* **Server:** Mini-Redis running on WSL
+* **Host:** `172.20.112.1`
+* **Port:** `6379`
+
+---
+
+### 1,000 Concurrent Connections
+
+```powershell
+python load_test.py --connections 1000 --host 172.20.112.1 --port 6379
+```
+
+**Result:**
+
+```text
 Total connections attempted : 1000
 Succeeded                   : 1000
 Failed                      : 0
 Total wall time             : 2.13 seconds
 Connections per second      : 469.8
-==================================================
-PS C:\Users\ujjwa\Desktop\mini-redis> python load_test.py --connections 1024 --host 172.20.112.1 --port 6379
-Launching 1024 concurrent connections to 172.20.112.1:6379...
+```
 
-==================================================
+| Metric                |   Result |
+| --------------------- | -------: |
+| Connections attempted |    1,000 |
+| Successful            |    1,000 |
+| Failed                |        0 |
+| Total wall time       |   2.13 s |
+| Connections/sec       |    469.8 |
+| Success rate          | **100%** |
+
+---
+
+### 1,024 Concurrent Connections
+
+```powershell
+python load_test.py --connections 1024 --host 172.20.112.1 --port 6379
+```
+
+**Result:**
+
+```text
 Total connections attempted : 1024
 Succeeded                   : 1024
 Failed                      : 0
 Total wall time             : 1.72 seconds
 Connections per second      : 594.9
-==================================================
-PS C:\Users\ujjwa\Desktop\mini-redis> python load_test.py --connections 10000 --host 172.20.112.1 --port 6379
-Launching 10000 concurrent connections to 172.20.112.1:6379...
+```
 
-==================================================
+| Metric                |   Result |
+| --------------------- | -------: |
+| Connections attempted |    1,024 |
+| Successful            |    1,024 |
+| Failed                |        0 |
+| Total wall time       |   1.72 s |
+| Connections/sec       |    594.9 |
+| Success rate          | **100%** |
+
+---
+
+### 10,000 Concurrent Connections
+
+```powershell
+python load_test.py --connections 10000 --host 172.20.112.1 --port 6379
+```
+
+**Result:**
+
+```text
 Total connections attempted : 10000
 Succeeded                   : 10000
 Failed                      : 0
 Total wall time             : 17.25 seconds
 Connections per second      : 579.8
-==================================================
-PS C:\Users\ujjwa\Desktop\mini-redis> 
+```
+
+| Metric                |   Result |
+| --------------------- | -------: |
+| Connections attempted |   10,000 |
+| Successful            |   10,000 |
+| Failed                |        0 |
+| Total wall time       |  17.25 s |
+| Connections/sec       |    579.8 |
+| Success rate          | **100%** |
+
+---
+
+### Summary
+
+| Concurrent Connections | Successful | Failed | Wall Time | Connections/sec |
+| ---------------------: | ---------: | -----: | --------: | --------------: |
+|                  1,000 |      1,000 |      0 |    2.13 s |           469.8 |
+|                  1,024 |      1,024 |      0 |    1.72 s |           594.9 |
+|                 10,000 |     10,000 |      0 |   17.25 s |           579.8 |
+
+The server successfully accepted **all 10,000 concurrent connection attempts with zero failures**, demonstrating that the Java NIO reactor architecture can handle a high number of simultaneous client connections in the tested environment.
 
 
 ## Known limitations (stated, not hidden)
